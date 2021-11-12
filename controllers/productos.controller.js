@@ -9,7 +9,7 @@ const obtenerProductos = async (req, res = response) => {
     Producto.countDocuments(query),
     Producto.find(query)
       .populate("usuario", "nombre")
-      .populate("categoria, nombre")
+      .populate("categoria", "nombre")
       .skip(Number(desde))
       .limit(Number(limite)),
   ]);
@@ -24,7 +24,7 @@ const obtenerProducto = async (req, res = response) => {
   const { id } = req.params;
   const producto = await Producto.findById(id)
     .populate("usuario", "nombre")
-    .populate("categoria", "nombre")
+    
 
   res.json(producto);
 };
