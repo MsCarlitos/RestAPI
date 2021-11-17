@@ -2,11 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
 const { dbConnection } = require('../database/config.database');
+const { socketController } = require('../sockets/socketController');
 
 class Server {
     constructor() {
         this.app = express();
         this.port = process.env.PORT;
+        this.server = require('http').createServer( this.app );
+        this.io = require('socket.io')(this.server);
         this.path = {
             auth:       '/api/auth',
             buscar:     '/api/buscar',
@@ -22,6 +25,9 @@ class Server {
 
         //Rutas de la aplicacion
         this.routes();
+
+        //Sockets
+        this.sockets();
     }
 
     async conectDB(){
@@ -37,7 +43,7 @@ class Server {
         //Directorio Publico
         this.app.use(express.static('public'));
 
-        //Fileupload - Carga de archivod
+        //Fileupload - Carga de archivos
         this.app.use(fileUpload({
             useTempFiles: true,
             tempFileDir: '/tmp/',
@@ -54,8 +60,12 @@ class Server {
         this.app.use(this.path.usuarios,   require('../routes/user.routes'));
     }
 
+    sockets() {
+        this.io.on('connection', socketController )
+    }
+
     listen() {
-        this.app.listen(this.port, () => {
+        this.server.listen(this.port, () => {
             console.log(`Servidor Corriendo en el puerto ${this.port}`);
         })
     }
